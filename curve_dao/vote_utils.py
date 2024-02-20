@@ -8,7 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def make_vote(target, actions, description):
+
+### ----- VOTE CREATION UTILS ----- ###
+
+def get_evm_script(target, actions):
     """Prepares EVM script and creates an on-chain AragonDAO vote.
 
     Args:
@@ -26,26 +29,12 @@ def make_vote(target, actions, description):
     #vote_creator = boa.env.eoa
     #assert aragon_voting.canCreateNewVote(vote_creator), "dev: user cannot create new vote"
 
-    evm_script = prepare_vote_script(target, actions)
-    print("EVM script:", evm_script)
-    
-    ipfs_hash = get_ipfs_hash_from_description(description)
-    print("IPFS hash:", ipfs_hash)
-
-
-    with boa.env.prank("0x7a16fF8270133F063aAb6C9977183D9e72835428"):
-        tx = aragon_voting.newVote(
-            evm_script,
-            f"ipfs: {ipfs_hash}",
-            False,
-            False,
-        )
-
-    return tx 
+    evm_script = prepare_evm_script(target, actions)
+    return evm_script
 
 
 
-def prepare_vote_script(target: Dict, actions: List[Tuple]):
+def prepare_evm_script(target: Dict, actions: List[Tuple]):
     """Generates EVM script to be executed by AragonDAO contracts.
 
     Args:
@@ -73,3 +62,24 @@ def prepare_vote_script(target: Dict, actions: List[Tuple]):
 
 
     return evm_script
+
+
+
+
+### ----- DECODING VOTES ----- ###
+
+"""def get_vote_script(vote_type: str, vote_id: int) -> str:
+    voting_contract_address = get_dao_voting_contract(vote_type)
+
+    voting_contract = boa.from_etherscan(voting_contract_address["voting"], name="AragonVoting", api_key=os.getenv("ETHERSCAN_API_KEY"))
+    #voting_contract = boa.load_abi("./contracts/Voting.json", name="AragonVoting")
+    #voting_contract = voting_contract.at(voting_contract_address)
+
+    vote = voting_contract.getVote(vote_id)
+    print(vote)
+    script = vote["script"]
+    print(script)
+    return script
+
+
+get_vote_script("ownership", 100)"""
